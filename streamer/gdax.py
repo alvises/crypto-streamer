@@ -17,7 +17,7 @@ LOGGER = logging.getLogger('GdaxStreamer')
 LOGGER.setLevel(logging.INFO)
 
 GDAX_WSS_URL = 'wss://ws-feed.gdax.com'
-
+DEFAULT_WS_TIMEOUT = 30
 
 
 class GdaxStreamer():
@@ -27,7 +27,7 @@ class GdaxStreamer():
 		self._channels = channels
 		if len(self._products) == 0: raise NoProductsError()
 		if len(self._channels) == 0: raise NoChannelsError()
-		self._timeout = timeout
+		self._timeout = timeout or DEFAULT_WS_TIMEOUT
 
 
 	def start(self):
@@ -36,19 +36,22 @@ class GdaxStreamer():
 		Tick data is then streamed into Kafka GDAX topic.
 		"""
 		self._stop = False
-		self.ws = create_connection(GDAX_WSS_URL,timeout=2)
 
 
+	def _connect(self):
+		self._ws = create_connection(GDAX_WSS_URL, timeout=self._timeout)
+		self._ws.send(self._subscription_message())
 
-	def subscription_message(self):
+	def _subscription_message(self):
 		"""
-		Subscription message based on products and channels
+		Subscription message based on products and channels.
+		Heartbeat channel is added to have a validation of the sequence.
 
 		:return: string
 		"""
 		return json.dumps({
 			'type': 'subscribe',
-			'product_ids': self._products,
-			'channels': self._channels
+			'product_ids': list(set(self._products)),
+			'channels': list(set(self._channels + ['heartbeat']))
 		})
 
