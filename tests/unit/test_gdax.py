@@ -20,6 +20,23 @@ def last_match_msg():
         "sequence": 463248628, "time": "2018-02-16T01:25:40.647000Z"
     }
 
+@pytest.fixture
+def subscription_response_msg():
+    return {
+        "type": "subscriptions",
+        "channels": [
+            {
+                "name": "matches",
+                "product_ids": ["LTC-EUR"]
+            },
+            {
+                "name": "heartbeat",
+                "product_ids": ["LTC-EUR"]
+            }
+        ]
+    }
+
+
 
 class TestGdaxStreamer:
 
@@ -122,7 +139,7 @@ class TestGdaxStreamer:
         gdax.on_message.assert_called_once_with(last_message)
 
 
-    def test__handle_message__handles_subscription_last_match(self,last_match_msg):
+    def test__handle_message__handles_last_match(self,last_match_msg):
         from streamer.gdax import GdaxStreamer
         gdax = GdaxStreamer(['LTC-EUR'])
 
@@ -134,12 +151,21 @@ class TestGdaxStreamer:
         on_last_match_mock.assert_called_once_with(last_match_msg)
 
 
+    def test__handle_message__handles_subscriptions_response(self,subscription_response_msg):
+        from streamer.gdax import GdaxStreamer
+        gdax = GdaxStreamer(['LTC-EUR'])
+
+        on_subscriptions_mock = MagicMock()
+        gdax.on_subscriptions = on_subscriptions_mock
+
+        gdax._handle_message(subscription_response_msg)
+
+        on_subscriptions_mock.assert_called_once_with(subscription_response_msg)
 
 
-        # handle first message
 
 
-    # test real connection failure and mock it, during connection
+        # test real connection failure and mock it, during connection
     # test real connection timeout/failure when receiving data
 
     # heartbeat ?

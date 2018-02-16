@@ -55,6 +55,14 @@ class GdaxStreamer():
 		"""
 		pass
 
+	def on_subscriptions(self,subscriptions_msg):
+		"""
+		Once the subscription message is sent, an subscriptions_msg answer is sent.
+		:param subscriptions_msg: dict
+		"""
+		pass
+
+
 	def _connect(self):
 		self._ws = create_connection(GDAX_WSS_URL, timeout=self._timeout)
 
@@ -83,6 +91,8 @@ class GdaxStreamer():
 		:param msg: dict
 		"""
 		self.on_message(msg)
-
-		if msg.get('type') == 'last_match':
+		msg_type = msg.get('type')
+		if msg_type == 'last_match':
 			self.on_last_match(msg)
+		elif msg_type == 'subscriptions':
+			self.on_subscriptions(msg)
