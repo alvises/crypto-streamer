@@ -10,6 +10,17 @@ import json
 from mock import MagicMock
 
 
+@pytest.fixture
+def last_match_msg():
+    return {
+        "type": "last_match", "trade_id": 2562730,
+        "maker_order_id": "ce6504d8-44b5-44ab-8e2e-487a15931e59",
+        "taker_order_id": "44547f40-6a6f-4b7d-a993-9b1747d75408",
+        "side": "sell", "size": "3.53526947",
+        "sequence": 463248628, "time": "2018-02-16T01:25:40.647000Z"
+    }
+
+
 class TestGdaxStreamer:
 
     def test__subscribtion_message__multiple_valid_products(self):
@@ -98,13 +109,34 @@ class TestGdaxStreamer:
         ws_mock.send.assert_called_with(subscription_msg)
 
 
+    def test__handle_message__proxy_each_message(self):
+        from streamer.gdax import GdaxStreamer
+        gdax = GdaxStreamer(['ETH-EUR'])
+
+        on_message_mock = MagicMock()
+        gdax.on_message = on_message_mock
+
+        last_message = {'type': 'subscriptions'}
+        gdax._handle_message(last_message)
+
+        gdax.on_message.assert_called_once_with(last_message)
+
+
+    def test__handle_message__handles_subscription_last_match(self,last_match_msg):
+        from streamer.gdax import GdaxStreamer
+        gdax = GdaxStreamer(['LTC-EUR'])
+
+        on_last_match_mock = MagicMock()
+        gdax.on_last_match = on_last_match_mock
+
+        gdax._handle_message(last_match_msg)
+
+        on_last_match_mock.assert_called_once_with(last_match_msg)
 
 
 
 
-    # once sent subscription message -> subscription confirmation
-
-    # handle first message
+        # handle first message
 
 
     # test real connection failure and mock it, during connection

@@ -30,6 +30,8 @@ class GdaxStreamer():
 		self._timeout = timeout or DEFAULT_WS_TIMEOUT
 
 
+
+
 	def start(self):
 		"""
 		Websocket client connects to GDAX server to the realtime tick data.
@@ -37,6 +39,21 @@ class GdaxStreamer():
 		"""
 		self._stop = False
 
+
+	def on_message(self, msg):
+		"""
+		Callback for all the messages.
+		"""
+		pass
+
+	def on_last_match(self,last_match):
+		"""
+		Callback for last_match msg.
+		Once connected and subscribed, a last match message is sent.
+
+		:param last_match: dict
+		"""
+		pass
 
 	def _connect(self):
 		self._ws = create_connection(GDAX_WSS_URL, timeout=self._timeout)
@@ -59,3 +76,13 @@ class GdaxStreamer():
 			'channels': list(set(self._channels + ['heartbeat']))
 		})
 
+
+	def _handle_message(self,msg):
+		"""
+		Handles all the message and proxy them to callbacks.
+		:param msg: dict
+		"""
+		self.on_message(msg)
+
+		if msg.get('type') == 'last_match':
+			self.on_last_match(msg)
