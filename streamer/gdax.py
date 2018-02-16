@@ -40,7 +40,11 @@ class GdaxStreamer():
 
 	def _connect(self):
 		self._ws = create_connection(GDAX_WSS_URL, timeout=self._timeout)
+
+
+	def _subscribe(self):
 		self._ws.send(self._subscription_message())
+
 
 	def _subscription_message(self):
 		"""

@@ -68,7 +68,7 @@ class TestGdaxStreamer:
             GdaxStreamer(["ETH-EUR"],[])
 
 
-    def test__connect__connects_to_gdax_sending_subscription_message(self):
+    def test__connect__connects_to_gdax(self):
         import websocket
         create_connection_mock = MagicMock()
         websocket.create_connection = create_connection_mock
@@ -78,12 +78,21 @@ class TestGdaxStreamer:
         gdax._connect()
 
         create_connection_mock.assert_called_once_with("wss://ws-feed.gdax.com",timeout=30)
-        ws_mock = create_connection_mock.return_value
+
+
+    def test__subscribe__sends_subscription_message(self):
+        from streamer.gdax import GdaxStreamer
+        gdax = GdaxStreamer(['ETH-EUR'],['matches'],30)
+
+        ws_mock = MagicMock()
+        gdax._ws = ws_mock
+
+        gdax._subscribe()
 
         subscription_msg = json.dumps({
             'type': 'subscribe',
             'product_ids': ['ETH-EUR'],
-            'channels': ['matches','heartbeat']
+            'channels': list(set(['matches','heartbeat']))
         })
 
         ws_mock.send.assert_called_with(subscription_msg)
@@ -92,8 +101,6 @@ class TestGdaxStreamer:
 
 
 
-    # test real connection failure and mock it, during connection
-    # test once opened send subscription message
 
     # once sent subscription message -> subscription confirmation
 
