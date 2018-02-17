@@ -23,7 +23,7 @@ def test__connect_and_get_last_match():
 	assert 'last_match' in json.loads(msg)['type']
 
 
-def test__connects__get_last_match__disconnect():
+def test__start__get_last_match__disconnect():
 	gdax = GdaxStreamer(['LTC-EUR'])
 	def get_last_match_and_disconnect(last_match):
 		print("LAST MATCH",last_match)
@@ -32,3 +32,18 @@ def test__connects__get_last_match__disconnect():
 	gdax.start()
 
 	assert not gdax._mainloop_running
+
+
+@pytest.skip('this can keep few minutes')
+def test__start__get_match_and_disconnect():
+	gdax = GdaxStreamer(['LTC-EUR'])
+	def get_match_and_disconnect(msg):
+		if msg['type'] == 'match':
+			print("MATCH TRADE",msg)
+			gdax.disconnect()
+
+	gdax.on_message = get_match_and_disconnect
+	gdax.start()
+
+	assert not gdax._mainloop_running
+

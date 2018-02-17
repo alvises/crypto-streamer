@@ -8,27 +8,45 @@
 import pytest
 import json
 from mock import MagicMock
+import os,binascii,random
 
 from gdax.streamer import GdaxStreamer, NoChannelsError, NoProductsError
 from websocket import WebSocketTimeoutException, \
     WebSocketConnectionClosedException, WebSocketAddressException
+
+
+def random_order_id():
+    return "%s-%s-%s-%s-%s" % (
+        binascii.b2a_hex(os.urandom(8)), binascii.b2a_hex(os.urandom(4)),
+        binascii.b2a_hex(os.urandom(4)),binascii.b2a_hex(os.urandom(4)),
+        binascii.b2a_hex(os.urandom(8))
+    )
+
+def random_order_id():
+    return int(random.random()*1000000)
+
+def random_sequence():
+    return int(random.random() * 1000000000)
 
 @pytest.fixture
 def gdax_matches(): return GdaxStreamer(['LTC-EUR'])
 
 
 @pytest.fixture
-def last_match_msg():
+def match_msg():
     return {
-        "type": "last_match", "trade_id": 2562730,
-        "maker_order_id": "ce6504d8-44b5-44ab-8e2e-487a15931e59",
-        "taker_order_id": "44547f40-6a6f-4b7d-a993-9b1747d75408",
+        "type": "match", "trade_id": random_order_id(),
+        "maker_order_id": random_order_id(),
+        "taker_order_id": random_order_id(),
         "side": "sell", "size": "3.53526947",
-        "sequence": 463248628, "time": "2018-02-16T01:25:40.647000Z"
+        "price": "183.80000000", "product_id": "LTC-EUR",
+        "sequence": random_sequence(), "time": "2018-02-16T01:25:40.647000Z"
     }
 
-# @pytest.fixture
-# def match_msg():
+@pytest.fixture
+def last_match_msg(match_msg):
+    match_msg['type'] = "last_match"
+    return match_msg
 
 
 @pytest.fixture
