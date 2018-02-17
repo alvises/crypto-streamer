@@ -22,3 +22,13 @@ def test__connect_and_get_last_match():
 
 	assert 'last_match' in json.loads(msg)['type']
 
+
+def test__connects__get_last_match__disconnect():
+	gdax = GdaxStreamer(['LTC-EUR'])
+	def get_last_match_and_disconnect(last_match):
+		print("LAST MATCH",last_match)
+		gdax.disconnect()
+	gdax.on_last_match = get_last_match_and_disconnect
+	gdax.start()
+
+	assert not gdax._mainloop_running

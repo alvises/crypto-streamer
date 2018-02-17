@@ -37,7 +37,15 @@ class GdaxStreamer():
 		Websocket client connects to GDAX server to the realtime tick data.
 		Tick data is then streamed into Kafka GDAX topic.
 		"""
-		self._stop = False
+		self._connect()
+		self._subscribe()
+		self._mainloop()
+
+
+	def disconnect(self):
+		self._mainloop_running = False
+		self._ws.close()
+		self._ws = None
 
 
 	def on_message(self, msg):
@@ -64,9 +72,9 @@ class GdaxStreamer():
 
 	def on_connection_error(self,e):
 		"""
-		Called when a connection error is caught.
+		Called when a connection error during subscription or mainloop is caught.
 		If not implemented, it raises the exception
-		
+
 		:param e: exception
 		:return: None, if True it reconnects automatically
 		"""
@@ -80,7 +88,10 @@ class GdaxStreamer():
 
 
 	def _subscribe(self):
-		self._ws.send(self._subscription_message())
+		try:
+			self._ws.send(self._subscription_message())
+		except Exception as e:
+			return self.on_connection_error(e)
 
 
 	def _subscription_message(self):
@@ -117,9 +128,9 @@ class GdaxStreamer():
 		the messages from GDAX.
 		It sends a ping every 30 seconds.
 		"""
-		self._stop = False
+		self._mainloop_running = True
 
-		while not self._stop:
+		while self._mainloop_running:
 			try:
 				data = self._ws.recv()
 			except Exception as e:

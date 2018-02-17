@@ -27,6 +27,10 @@ def last_match_msg():
         "sequence": 463248628, "time": "2018-02-16T01:25:40.647000Z"
     }
 
+# @pytest.fixture
+# def match_msg():
+
+
 @pytest.fixture
 def subscription_response_msg():
     return {
@@ -141,10 +145,8 @@ class TestGdaxStreamer:
 
     def test__handle_message__handles_last_match(self,gdax_matches,last_match_msg):
         gdax_matches.on_last_match = MagicMock()
-
         gdax_matches._handle_message(last_match_msg)
-
-        gdax_matches.assert_called_once_with(last_match_msg)
+        gdax_matches.on_last_match.assert_called_once_with(last_match_msg)
 
 
 
@@ -160,17 +162,16 @@ class TestGdaxStreamer:
 
     def test__handle_message__handles_match(self,gdax_matches,match_msg):
         gdax_matches.on_match= MagicMock()
-
         gdax_matches._handle_message(match_msg)
-
         gdax_matches.on_match.assert_called_once_with(match_msg)
 
 
-    def test__connect__connection_error_triggers_on_connection_error_is_called(self,gdax_matches):
+    def test__connect__connection_error_raises_the_error(self,gdax_matches):
         gdax_matches._create_connection = MagicMock(side_effect=WebSocketAddressException)
         gdax_matches.on_connection_error = MagicMock()
-        gdax_matches._connect()
-        gdax_matches.on_connection_error.assert_called_once()
+        with pytest.raises(WebSocketAddressException):
+            gdax_matches._connect()
+
 
 
     def test__subscribe__connection_error_triggers_on_connection_error_is_called(self,gdax_matches):
