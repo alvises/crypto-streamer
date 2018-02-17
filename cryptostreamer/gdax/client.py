@@ -63,7 +63,7 @@ class GdaxClient(ProviderClient):
 		Callback for all the messages.
 		"""
 		LOGGER.debug("recv: %s" %msg)
-		return
+		pass
 
 
 	def on_heartbeat(self,heartbeat_msg):
@@ -71,7 +71,7 @@ class GdaxClient(ProviderClient):
 		Callback to get heartbeat every second
 
 		"""
-		return
+		pass
 
 	def on_last_match(self,last_match):
 		"""
@@ -80,21 +80,27 @@ class GdaxClient(ProviderClient):
 
 		:param last_match: dict
 		"""
-		return
+		pass
 
 	def on_subscriptions(self,subscriptions_msg):
 		"""
 		Once the subscription message is sent, an subscriptions_msg answer is sent.
 		:param subscriptions_msg: dict
 		"""
-		return
+		pass
 
 	def on_match(self,match_msg):
 		"""
 		Implement this callback to get each trade.
 		:param match_msg:
 		"""
-		return
+		pass
+
+	def on_connected(self):
+		"""
+		Called when connected to websocket
+		"""
+		pass
 
 
 	def on_connection_error(self,e):
@@ -113,10 +119,13 @@ class GdaxClient(ProviderClient):
 
 	def _connect(self):
 		self._ws = self._create_connection(GDAX_WSS_URL, timeout=self._timeout)
+		self.on_connected()
+
 
 	def _disconnect(self):
 		self._ws.close()
 		self._ws = None
+
 
 	def _subscribe(self):
 		try:

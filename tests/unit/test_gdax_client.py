@@ -150,6 +150,12 @@ class TestGdaxStreamer:
             .assert_called_once_with("wss://ws-feed.gdax.com",timeout=30)
 
 
+    def test__on_connected__called_when_ws_connected(self,gdax_matches):
+        gdax_matches._create_connection = MagicMock()
+        gdax_matches.on_connected = MagicMock()
+        gdax_matches._connect()
+        gdax_matches.on_connected.assert_called_once()
+
 
     def test__subscribe__sends_subscription_message(self):
         gdax = GdaxClient(['ETH-EUR'],['matches'],30)
