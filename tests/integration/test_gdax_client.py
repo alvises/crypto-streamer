@@ -34,7 +34,7 @@ def test__start__get_last_match__disconnect():
 	assert not gdax._mainloop_running
 
 
-@pytest.skip('this can keep few minutes')
+@pytest.mark.skip('this can keep few minutes')
 def test__start__get_match_and_disconnect():
 	gdax = GdaxStreamer(['LTC-EUR'])
 	def get_match_and_disconnect(msg):

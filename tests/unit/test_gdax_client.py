@@ -218,20 +218,6 @@ class TestGdaxStreamer:
 
 
 
-    def test__start__reconnects_if_mainloop_returns_true(self,gdax_matches):
-        gdax_matches._connect = MagicMock()
-        gdax_matches._subscribe = MagicMock()
-        gdax_matches.__loops_count = 0
-        def mainloop_mock():
-            if gdax_matches.__loops_count < 3:
-                gdax_matches.__loops_count += 1
-                return True
-            else: return None
-        gdax_matches._mainloop = mainloop_mock
-
-        gdax_matches.start()
-        assert gdax_matches.__loops_count == 3
-
 
 # implementation of ping
 # streamer to client
