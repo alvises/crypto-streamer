@@ -10,7 +10,7 @@ import json
 from mock import MagicMock
 import os,binascii,random
 
-from gdax.streamer import GdaxStreamer, NoChannelsError, NoProductsError
+from gdax.client import GdaxStreamer, NoChannelsError, NoProductsError
 from websocket import WebSocketTimeoutException, \
     WebSocketConnectionClosedException, WebSocketAddressException
 
@@ -233,12 +233,12 @@ class TestGdaxStreamer:
         assert gdax_matches.__loops_count == 3
 
 
-
-            # test connection to kafka
-    # every message received is sent to kafka GDAX-TOPIC
-
-    # the kafka key should be the product
-
-    # does the subscription should be sent
+# implementation of ping
+# streamer to client
+# no automatic reconnection (on error disconnects)
+# streamer in separate class (kafka gdax streamer)
+# streamer implements reconnect
+# streamer implements download of latest data (to be streamed in a seperate topic/key
+#     or with a specific property
 
 

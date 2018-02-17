@@ -31,23 +31,14 @@ class GdaxStreamer():
 
 
 
+
+
 	def start(self):
 		"""
 		Websocket client connects to GDAX server to the realtime tick data.
 		Tick data is then streamed into Kafka GDAX topic.
 
-		Implement on_error callback if you want to handle automatic reconnection.
-		If on_error returns True the object reconnects to gdax
-		"""
-		while self._start(): pass
-
-
-	def _start(self):
-		"""
-		Websocket client connects to GDAX server to the realtime tick data.
-		Tick data is then streamed into Kafka GDAX topic.
-
-		return: None/True . True automatically reconnects
+		:return: None or on_error callback return
 		"""
 		self._connect()
 		self._subscribe()

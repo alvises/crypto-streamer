@@ -1,5 +1,5 @@
 import pytest, json
-from gdax.streamer import GdaxStreamer
+from gdax.client import GdaxStreamer
 
 def test__connect_and_get_subscription_confirmation():
 	gdax = GdaxStreamer(['LTC-EUR'],['matches'])
