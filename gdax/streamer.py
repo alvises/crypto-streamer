@@ -3,11 +3,10 @@
 	Author: Alvise Susmel <alvise@poeticoding.com>
 """
 
-from websocket import create_connection, WebSocketTimeoutException
 import json
 import logging
 import time
-
+from websocket import create_connection, WebSocketTimeoutException, WebSocketConnectionClosedException
 
 class NoProductsError(Exception): pass
 class NoChannelsError(Exception): pass
@@ -23,6 +22,7 @@ DEFAULT_WS_TIMEOUT = 30
 class GdaxStreamer():
 
 	def __init__(self,products,channels=['matches'],timeout=30):
+		self._create_connection = create_connection
 		self._products = products
 		self._channels = channels
 		if len(self._products) == 0: raise NoProductsError()
@@ -44,7 +44,7 @@ class GdaxStreamer():
 		"""
 		Callback for all the messages.
 		"""
-		pass
+		return
 
 	def on_last_match(self,last_match):
 		"""
@@ -53,18 +53,30 @@ class GdaxStreamer():
 
 		:param last_match: dict
 		"""
-		pass
+		return
 
 	def on_subscriptions(self,subscriptions_msg):
 		"""
 		Once the subscription message is sent, an subscriptions_msg answer is sent.
 		:param subscriptions_msg: dict
 		"""
-		pass
+		return
+
+	def on_connection_error(self,e):
+		"""
+		Called when a connection error is caught.
+		If not implemented, it raises the exception
+		
+		:param e: exception
+		:return: None, if True it reconnects automatically
+		"""
+		raise e
+
+
 
 
 	def _connect(self):
-		self._ws = create_connection(GDAX_WSS_URL, timeout=self._timeout)
+		self._ws = self._create_connection(GDAX_WSS_URL, timeout=self._timeout)
 
 
 	def _subscribe(self):
@@ -96,3 +108,23 @@ class GdaxStreamer():
 			self.on_last_match(msg)
 		elif msg_type == 'subscriptions':
 			self.on_subscriptions(msg)
+
+
+
+	def _mainloop(self):
+		"""
+		The mainloop receives loops and gets and handles
+		the messages from GDAX.
+		It sends a ping every 30 seconds.
+		"""
+		self._stop = False
+
+		while not self._stop:
+			try:
+				data = self._ws.recv()
+			except Exception as e:
+				# if on_error returns True
+				return self.on_connection_error(e)
+
+			msg = json.loads(data)
+			self._handle_message(msg)
