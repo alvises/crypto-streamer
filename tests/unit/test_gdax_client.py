@@ -69,6 +69,14 @@ def subscription_response_msg():
     }
 
 
+@pytest.fixture
+def heartbeat_msg():
+    return {
+        'type': 'heartbeat', 'last_trade_id': 12174997,
+        'product_id': 'BTC-EUR', 'sequence': 3376717970,
+        'time': '2018-02-17T21:09:45.371000Z'
+    }
+
 
 class TestGdaxStreamer:
 
@@ -186,6 +194,18 @@ class TestGdaxStreamer:
         gdax_matches.on_match.assert_called_once_with(match_msg)
 
 
+    def test__heartbeat__sent_to_on_message(self,gdax_matches,heartbeat_msg):
+        gdax_matches.on_message = MagicMock()
+        gdax_matches._handle_message(heartbeat_msg)
+        gdax_matches.on_message.assert_called_once_with(heartbeat_msg)
+
+
+    def test__handle_message__handles_heartbeat(self,gdax_matches,heartbeat_msg):
+        gdax_matches.on_heartbeat = MagicMock()
+        gdax_matches._handle_message(heartbeat_msg)
+        gdax_matches.on_heartbeat.assert_called_once_with(heartbeat_msg)
+
+
     def test__connect__connection_error_raises_the_error(self,gdax_matches):
         gdax_matches._create_connection = MagicMock(side_effect=WebSocketAddressException)
         gdax_matches.on_connection_error = MagicMock()
@@ -200,6 +220,7 @@ class TestGdaxStreamer:
         gdax_matches.on_connection_error = MagicMock()
         gdax_matches._subscribe()
         gdax_matches.on_connection_error.assert_called_once()
+
 
 
     def test__mainloop__timeout_exception_triggers_on_connection_error(self,gdax_matches):

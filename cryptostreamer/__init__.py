@@ -1,1 +1,1 @@
-from cryptostreamer.provider import ProviderClient
+from .provider import ProviderClient

@@ -6,17 +6,19 @@
 """
 
 import json
-import logging
+import logging, sys
 from websocket import create_connection, WebSocketTimeoutException, WebSocketConnectionClosedException
-from cryptostreamer import ProviderClient
+from cryptostreamer.provider import ProviderClient
 
 
 class NoProductsError(Exception): pass
 class NoChannelsError(Exception): pass
 
 
-LOGGER = logging.getLogger('GdaxStreamer')
+logging.basicConfig(stream=sys.stdout)
+LOGGER = logging.getLogger('GdaxClient')
 LOGGER.setLevel(logging.INFO)
+
 
 GDAX_WSS_URL = 'wss://ws-feed.gdax.com'
 DEFAULT_WS_TIMEOUT = 30
@@ -47,14 +49,25 @@ class GdaxClient(ProviderClient):
 
 
 	def stop(self):
-		self._mainloop_running = False
-		self._ws.close()
-		self._ws = None
+		try:
+			self._mainloop_running = False
+			self._disconnect()
+		except: pass
+
 
 
 	def on_message(self, msg):
 		"""
 		Callback for all the messages.
+		"""
+		LOGGER.debug("recv: %s" %msg)
+		return
+
+
+	def on_heartbeat(self,heartbeat_msg):
+		"""
+		Callback to get heartbeat every second
+
 		"""
 		return
 
@@ -90,6 +103,7 @@ class GdaxClient(ProviderClient):
 		:param e: exception
 		:return: None, if True it reconnects automatically
 		"""
+		LOGGER.error(e)
 		raise e
 
 
@@ -98,12 +112,24 @@ class GdaxClient(ProviderClient):
 	def _connect(self):
 		self._ws = self._create_connection(GDAX_WSS_URL, timeout=self._timeout)
 
+	def _disconnect(self):
+		self._ws.close()
+		self._ws = None
 
 	def _subscribe(self):
 		try:
-			self._ws.send(self._subscription_message())
+			subscription_msg = self._subscription_message()
+			heartbeat_msg = self._heartbeat_message()
+
+			LOGGER.info("send: %s" % subscription_msg)
+			self._ws.send(subscription_msg)
+
+			# LOGGER.info("send: %s" % heartbeat_msg)
+			# self._ws.send(heartbeat_msg)
+
 		except Exception as e:
 			return self.on_connection_error(e)
+
 
 
 	def _subscription_message(self):
@@ -119,6 +145,9 @@ class GdaxClient(ProviderClient):
 			'channels': list(set(self._channels + ['heartbeat']))
 		})
 
+	def _heartbeat_message(self):
+		return json.dumps({"type": "heartbeat", "on": True})
+
 
 	def _handle_message(self,msg):
 		"""
@@ -127,12 +156,11 @@ class GdaxClient(ProviderClient):
 		"""
 		self.on_message(msg)
 		msg_type = msg.get('type')
-		if msg_type == 'last_match':
-			self.on_last_match(msg)
-		elif msg_type == 'subscriptions':
-			self.on_subscriptions(msg)
-		elif msg_type == 'match':
-			self.on_match(msg)
+
+		if msg_type == 'heartbeat':         self.on_heartbeat(msg)
+		elif msg_type == 'last_match':      self.on_last_match(msg)
+		elif msg_type == 'subscriptions':   self.on_subscriptions(msg)
+		elif msg_type == 'match':           self.on_match(msg)
 
 
 	def _mainloop(self):
@@ -141,7 +169,6 @@ class GdaxClient(ProviderClient):
 		the messages from GDAX.
 		It sends a ping every 30 seconds.
 		"""
-
 		self._mainloop_running = True
 
 		while self._mainloop_running:

@@ -2,7 +2,7 @@ import json
 import pytest
 
 from cryptostreamer.gdax.client import GdaxClient
-
+from mock import MagicMock
 
 def test__connect_and_get_subscription_confirmation():
 	gdax = GdaxClient(['LTC-EUR'],['matches'])
@@ -35,6 +35,22 @@ def test__start__get_last_match__disconnect():
 	gdax.start()
 
 	assert not gdax._mainloop_running
+
+def test__receives_heartbeat():
+	from threading import Thread
+	from time import sleep
+	gdax = GdaxClient(['LTC-EUR'])
+	gdax.on_heartbeat = MagicMock()
+	try:
+		thread = Thread(target=gdax.start)
+		thread.start()
+		sleep(5)
+		gdax.stop()
+		thread.join()
+	except: pass
+
+	gdax.on_heartbeat.assert_called()
+
 
 
 @pytest.mark.skip('this can keep  minutes if no trades are made')
