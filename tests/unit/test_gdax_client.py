@@ -220,13 +220,3 @@ class TestGdaxStreamer:
 
 
 
-
-# implementation of ping
-# streamer to client
-# no automatic reconnection (on error disconnects)
-# streamer in separate class (kafka gdax streamer)
-# streamer implements reconnect
-# streamer implements download of latest data (to be streamed in a seperate topic/key
-#     or with a specific property
-
-

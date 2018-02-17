@@ -1,0 +1,3 @@
+
+class GDAXKafkaProducer(object):
+	pass

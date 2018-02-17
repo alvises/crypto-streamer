@@ -7,7 +7,6 @@
 
 import json
 import logging
-import time
 from websocket import create_connection, WebSocketTimeoutException, WebSocketConnectionClosedException
 from cryptostreamer import ProviderClient
 
@@ -153,3 +152,18 @@ class GdaxClient(ProviderClient):
 
 			msg = json.loads(data)
 			self._handle_message(msg)
+
+
+if __name__ == "__main__":
+	from os import environ
+
+	def get_list_from_env(key):
+		if key not in environ: return None
+		return list(map(lambda v: v.strip(), environ[key].strip().split(',')))
+
+	# ex BTC-EUR,LTC-EUR
+	products = get_list_from_env('GDAX_CLIENT_PRODUCT_IDS')
+	channels = get_list_from_env('GDAX_CLIENT_CHANNELS') or ['matches']
+	timeout = get_list_from_env('GDAX_CLIENT_TIMEOUT') or DEFAULT_WS_TIMEOUT
+	gdax = GdaxClient(products,channels,timeout)
+	gdax.start()
