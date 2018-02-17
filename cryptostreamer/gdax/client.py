@@ -142,14 +142,13 @@ class GdaxClient(ProviderClient):
 		the messages from GDAX.
 		It sends a ping every 30 seconds.
 		"""
+
 		self._mainloop_running = True
 
 		while self._mainloop_running:
 			try:
 				data = self._ws.recv()
 			except Exception as e:
-				# if on_error returns True
-				# it reconnects automatically
 				return self.on_connection_error(e)
 
 			msg = json.loads(data)

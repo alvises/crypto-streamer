@@ -1,11 +1,11 @@
 import json
 import pytest
 
-from cryptostreamer.gdax.client import GdaxStreamer
+from cryptostreamer.gdax.client import GdaxClient
 
 
 def test__connect_and_get_subscription_confirmation():
-	gdax = GdaxStreamer(['LTC-EUR'],['matches'])
+	gdax = GdaxClient(['LTC-EUR'],['matches'])
 	gdax._connect()
 	gdax._subscribe()
 
@@ -18,7 +18,7 @@ def test__connect_and_get_subscription_confirmation():
 
 
 def test__connect_and_get_last_match():
-	gdax = GdaxStreamer(['LTC-EUR'],['matches'])
+	gdax = GdaxClient(['LTC-EUR'],['matches'])
 	gdax._connect()
 	gdax._subscribe()
 	msg = gdax._ws.recv()
@@ -27,10 +27,10 @@ def test__connect_and_get_last_match():
 
 
 def test__start__get_last_match__disconnect():
-	gdax = GdaxStreamer(['LTC-EUR'])
+	gdax = GdaxClient(['LTC-EUR'])
 	def get_last_match_and_disconnect(last_match):
 		print("LAST MATCH",last_match)
-		gdax.disconnect()
+		gdax.stop()
 	gdax.on_last_match = get_last_match_and_disconnect
 	gdax.start()
 
@@ -39,7 +39,7 @@ def test__start__get_last_match__disconnect():
 
 @pytest.mark.skip('this can keep  minutes if no trades are made')
 def test__start__get_match_and_disconnect():
-	gdax = GdaxStreamer(['LTC-EUR'])
+	gdax = GdaxClient(['LTC-EUR'])
 	def get_match_and_disconnect(msg):
 		if msg['type'] == 'match':
 			print("MATCH TRADE",msg)

@@ -15,7 +15,7 @@ from mock import MagicMock
 from websocket import WebSocketTimeoutException, \
     WebSocketConnectionClosedException, WebSocketAddressException
 
-from cryptostreamer.gdax.client import GdaxStreamer, NoChannelsError, NoProductsError
+from cryptostreamer.gdax.client import GdaxClient, NoChannelsError, NoProductsError
 
 
 def random_order_id():
@@ -32,7 +32,7 @@ def random_sequence():
     return int(random.random() * 1000000000)
 
 @pytest.fixture
-def gdax_matches(): return GdaxStreamer(['LTC-EUR'])
+def gdax_matches(): return GdaxClient(['LTC-EUR'])
 
 
 @pytest.fixture
@@ -74,7 +74,7 @@ class TestGdaxStreamer:
 
     def test__subscribtion_message__multiple_valid_products(self):
         products = ['BTC-EUR','ETH-EUR']
-        gdax = GdaxStreamer(products=products)
+        gdax = GdaxClient(products=products)
 
         message = gdax._subscription_message()
         m = json.loads(message)
@@ -85,7 +85,7 @@ class TestGdaxStreamer:
 
 
     def test__subscribtion_message__valid_channel(self):
-        gdax = GdaxStreamer(['BTC-EUR'],channels=['matches'] )
+        gdax = GdaxClient(['BTC-EUR'],channels=['matches'] )
 
         message = gdax._subscription_message()
         m = json.loads(message)
@@ -96,7 +96,7 @@ class TestGdaxStreamer:
 
 
     def test__subscription_message__adds_heartbeat_to_channel_list(self):
-        gdax = GdaxStreamer(['BTC-EUR'], channels=['matches'])
+        gdax = GdaxClient(['BTC-EUR'], channels=['matches'])
         msg = json.loads(gdax._subscription_message())
 
         assert 'heartbeat' in msg['channels']
@@ -104,15 +104,14 @@ class TestGdaxStreamer:
 
 
     def test__subscription_message__no_duplicate_channels(self):
-        gdax = GdaxStreamer(['BTC-EUR'], channels=['matches','heartbeat','matches'])
+        gdax = GdaxClient(['BTC-EUR'], channels=['matches','heartbeat','matches'])
         msg = json.loads(gdax._subscription_message())
 
         assert msg['channels'].sort() == ['matches','heartbeat'].sort()
 
 
-
     def test__subscription_message__no_duplicate_products(self):
-        gdax = GdaxStreamer(['BTC-EUR','LTC-EUR','BTC-EUR'])
+        gdax = GdaxClient(['BTC-EUR','LTC-EUR','BTC-EUR'])
         msg = json.loads(gdax._subscription_message())
 
         assert msg['product_ids'].sort() == ['BTC-EUR','LTC-EUR'].sort()
@@ -121,18 +120,18 @@ class TestGdaxStreamer:
 
     def test_init__raises_exception_with_no_products(self):
         with pytest.raises(NoProductsError):
-            GdaxStreamer([])
+            GdaxClient([])
 
 
 
     def test__init__raises_exception_with_no_channels(self):
         with pytest.raises(NoChannelsError):
-            GdaxStreamer(["ETH-EUR"],[])
+            GdaxClient(["ETH-EUR"],[])
 
 
 
     def test__connect__connects_to_gdax(self):
-        gdax = GdaxStreamer(['ETH-EUR'],['matches'],30)
+        gdax = GdaxClient(['ETH-EUR'],['matches'],30)
         gdax._create_connection = MagicMock()
         gdax._connect()
 
@@ -142,7 +141,7 @@ class TestGdaxStreamer:
 
 
     def test__subscribe__sends_subscription_message(self):
-        gdax = GdaxStreamer(['ETH-EUR'],['matches'],30)
+        gdax = GdaxClient(['ETH-EUR'],['matches'],30)
         gdax._ws = MagicMock()
 
         gdax._subscribe()
