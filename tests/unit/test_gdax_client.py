@@ -9,9 +9,12 @@ import binascii
 import json
 import os
 import random
+import datetime
 
 import pytest
 from mock import MagicMock
+from freezegun import freeze_time
+
 from websocket import WebSocketTimeoutException, \
     WebSocketConnectionClosedException, WebSocketAddressException
 
@@ -227,7 +230,7 @@ class TestGdaxStreamer:
         gdax_matches._ws = MagicMock()
         gdax_matches.on_connection_error = MagicMock()
         gdax_matches._ws.recv.side_effect = WebSocketTimeoutException
-        gdax_matches._mainloop()
+        gdax_matches._mainloop_recv_msg()
         gdax_matches.on_connection_error.assert_called_once()
 
 
@@ -236,8 +239,21 @@ class TestGdaxStreamer:
         gdax_matches._ws = MagicMock()
         gdax_matches.on_connection_error = MagicMock()
         gdax_matches._ws.recv.side_effect = WebSocketConnectionClosedException
-        gdax_matches._mainloop()
+        gdax_matches._mainloop_recv_msg()
         gdax_matches.on_connection_error.assert_called_once()
 
+
+    def test__mainloop__sends_keepalive_ping_at_least_10s_between_the_pings(self,gdax_matches):
+        gdax_matches._ws = MagicMock()
+        gdax_matches._ws.recv.return_value = "{}"
+        ping_mock = gdax_matches._ws.ping
+        with freeze_time("2018-02-18 12:00:00"):
+            gdax_matches._pinged_at = datetime.datetime.now()
+            gdax_matches._mainloop_recv_msg()
+        ping_mock.assert_not_called()
+
+        with freeze_time("2018-02-18 12:00:11"):
+            gdax_matches._mainloop_recv_msg()
+        ping_mock.assert_called_once_with('keepalive')
 
 

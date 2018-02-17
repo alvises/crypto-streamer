@@ -7,6 +7,8 @@
 
 import json
 import logging, sys
+from datetime import datetime, timedelta
+
 from websocket import create_connection, WebSocketTimeoutException, WebSocketConnectionClosedException
 from cryptostreamer.provider import ProviderClient
 
@@ -149,6 +151,18 @@ class GdaxClient(ProviderClient):
 		return json.dumps({"type": "heartbeat", "on": True})
 
 
+
+	def _needs_ping(self):
+		return self._pinged_at + timedelta(seconds=10) < datetime.now()
+
+
+	def _ping(self):
+		self._ws.ping('keepalive')
+		self._pinged_at = datetime.now()
+
+
+
+
 	def _handle_message(self,msg):
 		"""
 		Handles all the message and proxy them to callbacks.
@@ -170,15 +184,21 @@ class GdaxClient(ProviderClient):
 		It sends a ping every 30 seconds.
 		"""
 		self._mainloop_running = True
+		self._pinged_at = datetime.now()
 
 		while self._mainloop_running:
-			try:
-				data = self._ws.recv()
-			except Exception as e:
-				return self.on_connection_error(e)
+			self._mainloop_recv_msg()
 
-			msg = json.loads(data)
-			self._handle_message(msg)
+
+	def _mainloop_recv_msg(self):
+		try:
+			if self._needs_ping(): self._ping()
+			data = self._ws.recv()
+		except Exception as e:
+			return self.on_connection_error(e)
+
+		msg = json.loads(data)
+		self._handle_message(msg)
 
 
 if __name__ == "__main__":

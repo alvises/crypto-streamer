@@ -36,7 +36,7 @@ def test__start__get_last_match__disconnect():
 
 	assert not gdax._mainloop_running
 
-def test__receives_heartbeat():
+def test_receives_heartbeats():
 	from threading import Thread
 	from time import sleep
 	gdax = GdaxClient(['LTC-EUR'])
