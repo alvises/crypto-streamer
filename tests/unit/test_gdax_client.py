@@ -5,14 +5,17 @@
     GdaxStreamer unit test
 """
 
-import pytest
+import binascii
 import json
-from mock import MagicMock
-import os,binascii,random
+import os
+import random
 
-from gdax.client import GdaxStreamer, NoChannelsError, NoProductsError
+import pytest
+from mock import MagicMock
 from websocket import WebSocketTimeoutException, \
     WebSocketConnectionClosedException, WebSocketAddressException
+
+from cryptostreamer.gdax.client import GdaxStreamer, NoChannelsError, NoProductsError
 
 
 def random_order_id():

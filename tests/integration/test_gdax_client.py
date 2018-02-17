@@ -1,5 +1,8 @@
-import pytest, json
-from gdax.client import GdaxStreamer
+import json
+import pytest
+
+from cryptostreamer.gdax.client import GdaxStreamer
+
 
 def test__connect_and_get_subscription_confirmation():
 	gdax = GdaxStreamer(['LTC-EUR'],['matches'])
@@ -34,7 +37,7 @@ def test__start__get_last_match__disconnect():
 	assert not gdax._mainloop_running
 
 
-@pytest.mark.skip('this can keep few minutes')
+@pytest.mark.skip('this can keep  minutes if no trades are made')
 def test__start__get_match_and_disconnect():
 	gdax = GdaxStreamer(['LTC-EUR'])
 	def get_match_and_disconnect(msg):
@@ -47,3 +50,6 @@ def test__start__get_match_and_disconnect():
 
 	assert not gdax._mainloop_running
 
+
+# cryptostreamer module
+# ProviderClient interface with basic methods and callbacks
