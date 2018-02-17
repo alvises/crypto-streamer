@@ -51,5 +51,4 @@ def test__start__get_match_and_disconnect():
 	assert not gdax._mainloop_running
 
 
-# cryptostreamer module
-# ProviderClient interface with basic methods and callbacks
+

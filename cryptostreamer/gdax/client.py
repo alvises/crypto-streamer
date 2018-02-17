@@ -1,12 +1,16 @@
 """
-	File name: gdax.py
+	File name: gdax/client.py
 	Author: Alvise Susmel <alvise@poeticoding.com>
+
+	Implementation of GDAX Client to get realtime data.
 """
 
 import json
 import logging
 import time
 from websocket import create_connection, WebSocketTimeoutException, WebSocketConnectionClosedException
+from cryptostreamer import ProviderClient
+
 
 class NoProductsError(Exception): pass
 class NoChannelsError(Exception): pass
@@ -19,7 +23,7 @@ GDAX_WSS_URL = 'wss://ws-feed.gdax.com'
 DEFAULT_WS_TIMEOUT = 30
 
 
-class GdaxStreamer():
+class GdaxClient(ProviderClient):
 
 	def __init__(self,products,channels=['matches'],timeout=30):
 		self._create_connection = create_connection
@@ -28,9 +32,6 @@ class GdaxStreamer():
 		if len(self._products) == 0: raise NoProductsError()
 		if len(self._channels) == 0: raise NoChannelsError()
 		self._timeout = timeout or DEFAULT_WS_TIMEOUT
-
-
-
 
 
 	def start(self):
@@ -46,7 +47,7 @@ class GdaxStreamer():
 
 
 
-	def disconnect(self):
+	def stop(self):
 		self._mainloop_running = False
 		self._ws.close()
 		self._ws = None
