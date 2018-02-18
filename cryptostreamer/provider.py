@@ -20,9 +20,9 @@ class ProviderClient(object):
 	def stop(self):
 		"""
 		Closes the connection and ends the mainloop, if any.
-
 		"""
 		pass
+
 
 
 	def on_message(self, msg):

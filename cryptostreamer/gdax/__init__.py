@@ -1,1 +1,1 @@
-from cryptostreamer.gdax.kafka import GDAXKafkaProducer
+from cryptostreamer.gdax.kafka import GdaxKafkaProducer

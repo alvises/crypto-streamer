@@ -28,7 +28,7 @@ DEFAULT_WS_TIMEOUT = 30
 
 class GdaxClient(ProviderClient):
 
-	def __init__(self,products,channels=['matches'],timeout=30):
+	def __init__(self,products=[],channels=['matches'],timeout=30):
 		self._create_connection = create_connection
 		self._products = products
 		self._channels = channels
@@ -44,6 +44,7 @@ class GdaxClient(ProviderClient):
 
 		:return: None or on_error callback return
 		"""
+		self.on_setup()
 		self._connect()
 		self._subscribe()
 		return self._mainloop()
@@ -55,6 +56,15 @@ class GdaxClient(ProviderClient):
 			self._mainloop_running = False
 			self._disconnect()
 		except: pass
+
+
+
+	def on_setup(self):
+		"""
+		Called before connecting to the provider
+		"""
+		pass
+
 
 
 
@@ -98,7 +108,13 @@ class GdaxClient(ProviderClient):
 
 	def on_connected(self):
 		"""
-		Called when connected to websocket
+		Called when connected to websocket.
+		"""
+		pass
+
+	def on_disconnected(self):
+		"""
+		Called when disconnected from gdax.
 		"""
 		pass
 
@@ -106,7 +122,7 @@ class GdaxClient(ProviderClient):
 	def on_connection_error(self,e):
 		"""
 		Called when a connection error during subscription or mainloop is caught.
-		If not implemented, it raises the exception
+		If not implemented, it raises the exception.
 
 		:param e: exception
 		:return: None, if True it reconnects automatically
@@ -125,6 +141,7 @@ class GdaxClient(ProviderClient):
 	def _disconnect(self):
 		self._ws.close()
 		self._ws = None
+		self.on_disconnected()
 
 
 	def _subscribe(self):
