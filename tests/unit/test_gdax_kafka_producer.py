@@ -56,6 +56,13 @@ def test_hearbeat_messages_are_never_published_to_kafka():
 	gdax_producer.on_message({'type': 'heartbeat'})
 	gdax_producer._kafka_producer.send.assert_not_called()
 
+def test_subscriptions_messages_are_never_published_to_kafka():
+	gdax_producer = GdaxKafkaProducer("gdax",{'products': ['BTC-USD']},{})
+	gdax_producer._kafka_producer = MagicMock()
+	gdax_producer.on_message({'type': 'subscriptions'})
+	gdax_producer._kafka_producer.send.assert_not_called()
+
+
 
 def test_when_sending_to_kafka_the_key_is_always_the_product_id():
 	# the reason is because having product id as key enforce the order of the received trades

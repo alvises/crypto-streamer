@@ -38,7 +38,7 @@ class GdaxKafkaProducer(GdaxClient):
 		self._send_to_kafka(msg)
 
 	def _all_msg_on_message(self,msg):
-		if msg.get('type') == 'heartbeat': return
+		if msg.get('type') in ['heartbeat','subscriptions']: return
 		self._send_to_kafka(msg)
 
 	def _send_to_kafka(self,msg):
