@@ -1,6 +1,7 @@
 from .client import GdaxClient
 from kafka import KafkaProducer
-import json
+
+KAFKA_RES_TIMEOUT = 30
 
 class GdaxKafkaProducer(GdaxClient):
 
@@ -11,14 +12,6 @@ class GdaxKafkaProducer(GdaxClient):
 		self._kafka_kwargs = kafka_kwargs
 		GdaxClient.__init__(self,**self._gdax_kwargs)
 
-	# def on_(self):
-	# 	self._kafka_producer = KafkaProducer(
-	# 		bootstrap_servers="localhost:9092",
-	# 		retries=5,
-	# 		compression_type="gzip",
-	# 		key_serializer=str.encode,
-	# 		value_serializer=lambda v: json.dumps(v).encode('utf-8')
-	# 	)
 
 	def on_setup(self):
 		self._kafka_producer = self._get_kafka_producer()
@@ -45,11 +38,18 @@ class GdaxKafkaProducer(GdaxClient):
 		msg = msg.copy()
 		msg.pop('maker_order_id', None)
 		msg.pop('taker_order_id',None)
-		self._kafka_producer.send(self._kafka_topic,key=msg['product_id'],value=msg)
+		try:
+			future = self._kafka_producer.send(
+				self._kafka_topic,
+				key=msg['product_id'],value=msg)
+			future.get(timeout=5)
+		except Exception as e:
+			self.on_error(e)
 
 
-	def on_match(self,match_msg):
-		self._send_to_kafka(match_msg)
+	def on_error(self,e):
+		self.stop()
+		raise e
 
 	def _get_kafka_producer(self):
 		return KafkaProducer(**self._kafka_kwargs)

@@ -96,3 +96,18 @@ def test_order_id_are_filtered():
 
 	assert 'maker_order_id' not in msg
 	assert 'taker_order_id' not in msg
+
+
+def test_kafka_send_error_stops_the_producer():
+	from kafka.errors import ConnectionError
+	gdax_producer = GdaxKafkaProducer("gdax", {'products': ['LTC-EUR']}, {})
+	gdax_producer._kafka_producer = MagicMock()
+	future_mock = gdax_producer._kafka_producer.send.return_value
+	future_mock.get.side_effect = ConnectionError
+
+	gdax_producer.stop = MagicMock()
+
+	with pytest.raises(ConnectionError):
+		gdax_producer.on_message({'type': 'match', 'product_id': 'LTC-EUR'})
+
+	gdax_producer.stop.assert_called_once()
