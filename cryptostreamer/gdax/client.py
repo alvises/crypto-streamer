@@ -52,6 +52,7 @@ class GdaxClient(ProviderClient):
 
 
 	def stop(self):
+		LOGGER.info("stop")
 		try:
 			self._mainloop_running = False
 			self._disconnect()
@@ -139,6 +140,7 @@ class GdaxClient(ProviderClient):
 
 
 	def _disconnect(self):
+		LOGGER.info("_disconnect")
 		self._ws.close()
 		self._ws = None
 		self.on_disconnected()

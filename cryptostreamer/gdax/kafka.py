@@ -42,6 +42,9 @@ class GdaxKafkaProducer(GdaxClient):
 		self._send_to_kafka(msg)
 
 	def _send_to_kafka(self,msg):
+		msg = msg.copy()
+		msg.pop('maker_order_id', None)
+		msg.pop('taker_order_id',None)
 		self._kafka_producer.send(self._kafka_topic,key=msg['product_id'],value=msg)
 
 

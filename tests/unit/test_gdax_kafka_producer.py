@@ -58,9 +58,34 @@ def test_hearbeat_messages_are_never_published_to_kafka():
 
 
 def test_when_sending_to_kafka_the_key_is_always_the_product_id():
+	# the reason is because having product id as key enforce the order of the received trades
+	# all the messages of one product will go in just one partition
+
 	gdax_producer = GdaxKafkaProducer("gdax",{'products': ['BTC-USD']},{})
 	gdax_producer._kafka_producer = MagicMock()
 
 	msg = {'type': 'match', 'product_id': 'BTC-USD'}
 	gdax_producer.on_message(msg)
 	gdax_producer._kafka_producer.send.assert_called_once_with('gdax',value=msg,key='BTC-USD')
+
+
+def test_order_id_are_filtered():
+	gdax_producer = GdaxKafkaProducer("gdax",{'products': ['LTC-EUR']},{})
+	gdax_producer._kafka_producer = MagicMock()
+	full_msg = {
+        "type": "match", "trade_id": 12345678,
+        "maker_order_id": "12345678",
+        "taker_order_id": "12345678",
+        "side": "sell", "size": "3.53526947",
+        "price": "183.80000000", "product_id": "LTC-EUR",
+        "sequence": 1234, "time": "2018-02-16T01:25:40.647000Z"
+    }
+
+	gdax_producer.on_message(full_msg)
+	msg = full_msg.copy()
+	msg.pop('maker_order_id',None)
+	msg.pop('taker_order_id', None)
+	gdax_producer._kafka_producer.send.assert_called_once_with('gdax',value=msg,key='LTC-EUR')
+
+	assert 'maker_order_id' not in msg
+	assert 'taker_order_id' not in msg
