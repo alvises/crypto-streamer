@@ -83,6 +83,12 @@ def heartbeat_msg():
 
 class TestGdaxStreamer:
 
+    def tearDown(self):
+        os.unsetenv('CRYPTO_GDAX_PRODUCTS')
+        os.unsetenv('CRYPTO_GDAX_CHANNELS')
+        os.unsetenv('CRYPTO_GDAX_TIMEOUT')
+
+
     def test__subscribtion_message__multiple_valid_products(self):
         products = ['BTC-EUR','ETH-EUR']
         gdax = GdaxClient(products=products)
@@ -263,3 +269,13 @@ class TestGdaxStreamer:
         ping_mock.assert_called_once_with('keepalive')
 
 
+    def test__create_with_environment(self):
+        os.environ['CRYPTO_GDAX_PRODUCTS'] = "BTC-USD,LTC-USD"
+        os.environ['CRYPTO_GDAX_CHANNELS'] = "matches,ticker"
+        os.environ['CRYPTO_GDAX_TIMEOUT'] = "10"
+
+        client = GdaxClient.create_with_environment()
+
+        assert client._products == ['BTC-USD','LTC-USD']
+        assert client._channels == ['matches','ticker']
+        assert client._timeout == 10

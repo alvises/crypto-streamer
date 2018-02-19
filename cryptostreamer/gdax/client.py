@@ -28,6 +28,17 @@ DEFAULT_WS_TIMEOUT = 30
 
 class GdaxClient(ProviderClient):
 
+	@classmethod
+	def create_with_environment(cls):
+		options = {
+			'products': cls.get_list_from_env('CRYPTO_GDAX_PRODUCTS'),
+			'channels': cls.get_list_from_env('CRYPTO_GDAX_CHANNELS'),
+			'timeout': cls.get_int_from_env('CRYPTO_GDAX_TIMEOUT')
+		}
+		options = {k: v for k,v in options.items() if v is not None}
+		return cls(**options)
+
+
 	def __init__(self,products=[],channels=['matches'],timeout=30):
 		self._create_connection = create_connection
 		self._products = products
@@ -227,18 +238,3 @@ class GdaxClient(ProviderClient):
 
 		msg = json.loads(data)
 		self._handle_message(msg)
-
-
-if __name__ == "__main__":
-	from os import environ
-
-	def get_list_from_env(key):
-		if key not in environ: return None
-		return list(map(lambda v: v.strip(), environ[key].strip().split(',')))
-
-	# ex BTC-EUR,LTC-EUR
-	products = get_list_from_env('GDAX_CLIENT_PRODUCT_IDS')
-	channels = get_list_from_env('GDAX_CLIENT_CHANNELS') or ['matches']
-	timeout = get_list_from_env('GDAX_CLIENT_TIMEOUT') or DEFAULT_WS_TIMEOUT
-	gdax = GdaxClient(products,channels,timeout)
-	gdax.start()
