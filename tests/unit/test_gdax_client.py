@@ -83,10 +83,13 @@ def heartbeat_msg():
 
 class TestGdaxStreamer:
 
-    def tearDown(self):
+    def unset_envvars(self):
         os.unsetenv('CRYPTO_GDAX_PRODUCTS')
         os.unsetenv('CRYPTO_GDAX_CHANNELS')
         os.unsetenv('CRYPTO_GDAX_TIMEOUT')
+
+    def setUp(self): self.unset_envvars()
+    def tearDown(self): self.unset_envvars()
 
 
     def test__subscribtion_message__multiple_valid_products(self):

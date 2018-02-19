@@ -4,6 +4,18 @@ from mock import MagicMock
 import os
 
 class TestKafkaProducer:
+	def unset_envvars(self):
+		os.unsetenv('CRYPTO_GDAX_PRODUCTS')
+		os.unsetenv('CRYPTO_GDAX_CHANNELS')
+		os.unsetenv('CRYPTO_GDAX_TIMEOUT')
+		os.unsetenv('CRYPTO_KAFKA_BOOTSTRAP_SERVERS')
+		os.unsetenv('CRYPTO_KAFKA_TOPIC')
+		os.unsetenv('CRYPTO_KAFKA_MATCHES_ONLY')
+
+
+	def setUp(self): self.unset_envvars()
+	def tearDown(self): self.unset_envvars()
+
 
 	def test__start__it_tries_to_connect_to_kafka_before_connecting_to_gdax(self):
 		gdax_producer = GdaxKafkaProducer("gdax",{'products':['BTC-USD']})
@@ -115,3 +127,20 @@ class TestKafkaProducer:
 		gdax_producer.stop.assert_called_once()
 
 
+	def test__create_with_environment(self):
+		os.environ['CRYPTO_GDAX_PRODUCTS'] = "LTC-EUR"
+		os.environ['CRYPTO_GDAX_CHANNELS'] = "ticker"
+		os.environ['CRYPTO_GDAX_TIMEOUT'] = "2"
+
+		os.environ['CRYPTO_KAFKA_BOOTSTRAP_SERVERS'] = 'localhost:9092'
+		os.environ['CRYPTO_KAFKA_TOPIC'] = 'gdax'
+		os.environ['CRYPTO_KAFKA_MATCHES_ONLY'] = 'true'
+
+		client = GdaxKafkaProducer.create_with_environment()
+
+		assert client._products == ['LTC-EUR']
+		assert client._channels == ['ticker']
+		assert client._timeout == 2
+		assert client._kafka_topic == 'gdax'
+		assert client._kafka_kwargs['bootstrap_servers'] == ['localhost:9092']
+		assert client._matches_only == True

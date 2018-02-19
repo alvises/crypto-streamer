@@ -30,13 +30,17 @@ class GdaxClient(ProviderClient):
 
 	@classmethod
 	def create_with_environment(cls):
-		options = {
+		kwargs = cls.kwargs_from_environment()
+		return cls(**kwargs)
+
+	@classmethod
+	def kwargs_from_environment(cls):
+		kwargs = {
 			'products': cls.get_list_from_env('CRYPTO_GDAX_PRODUCTS'),
 			'channels': cls.get_list_from_env('CRYPTO_GDAX_CHANNELS'),
 			'timeout': cls.get_int_from_env('CRYPTO_GDAX_TIMEOUT')
 		}
-		options = {k: v for k,v in options.items() if v is not None}
-		return cls(**options)
+		return {k: v for k,v in kwargs.items() if v is not None}
 
 
 	def __init__(self,products=[],channels=['matches'],timeout=30):

@@ -1,10 +1,26 @@
-
+import json
 from .client import GdaxClient
 from kafka import KafkaProducer
 
 KAFKA_RES_TIMEOUT = 30
 
 class GdaxKafkaProducer(GdaxClient):
+
+	@classmethod
+	def create_with_environment(cls):
+		kafka_topic = cls.get_str_from_env('CRYPTO_KAFKA_TOPIC')
+		matches_only = cls.get_boolean_from_env('CRYPTO_KAFKA_MATCHES_ONLY')
+		gdax_kwargs = GdaxClient.kwargs_from_environment()
+		kafka_kwargs = GdaxKafkaProducer.kwargs_from_environment()
+		return cls(kafka_topic,gdax_kwargs,kafka_kwargs,matches_only)
+
+	@classmethod
+	def kwargs_from_environment(cls):
+		kwargs= {
+			'bootstrap_servers': cls.get_list_from_env('CRYPTO_KAFKA_BOOTSTRAP_SERVERS')
+		}
+		return {k: v for k,v in kwargs.items() if v is not None}
+
 
 	def __init__(self,kafka_topic='gdax',gdax_kwargs={},kafka_kwargs={},matches_only=False):
 		self._kafka_topic = kafka_topic
@@ -53,4 +69,8 @@ class GdaxKafkaProducer(GdaxClient):
 		raise e
 
 	def _get_kafka_producer(self):
-		return KafkaProducer(**self._kafka_kwargs)
+		kwargs = self._kafka_kwargs.copy()
+		kwargs['key_serializer'] = str.encode
+		kwargs['value_serializer'] = lambda v: json.dumps(v).encode('utf-8')
+		kwargs['compression_type'] = 'gzip'
+		return KafkaProducer(**kwargs)
