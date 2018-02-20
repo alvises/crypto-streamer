@@ -8,7 +8,7 @@
 import json
 from datetime import datetime, timedelta
 
-from websocket import create_connection, WebSocketTimeoutException, WebSocketConnectionClosedException
+from websocket import create_connection
 from cryptostreamer.provider import ProviderClient
 
 
