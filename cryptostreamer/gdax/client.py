@@ -19,7 +19,7 @@ class NoChannelsError(Exception): pass
 
 logging.basicConfig(stream=sys.stdout)
 LOGGER = logging.getLogger('GdaxClient')
-LOGGER.setLevel(logging.INFO)
+LOGGER.setLevel(logging.DEBUG)
 
 
 GDAX_WSS_URL = 'wss://ws-feed.gdax.com'
@@ -88,7 +88,7 @@ class GdaxClient(ProviderClient):
 		"""
 		Callback for all the messages.
 		"""
-		LOGGER.debug("recv: %s" %msg)
+		LOGGER.info("recv: %s" %msg)
 		pass
 
 
