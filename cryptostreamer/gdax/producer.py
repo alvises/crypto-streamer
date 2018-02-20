@@ -12,8 +12,8 @@ class GdaxKafkaProducer(GdaxClient):
 
 	@classmethod
 	def create_with_environment(cls):
-		kafka_topic = cls.get_str_from_env('CRYPTO_KAFKA_TOPIC')
-		matches_only = cls.get_boolean_from_env('CRYPTO_KAFKA_MATCHES_ONLY')
+		kafka_topic = cls.get_str_from_env('CRYPTO_STREAMER_KAFKA_GDAX_TOPIC')
+		matches_only = cls.get_boolean_from_env('CRYPTO_STREAMER_KAFKA_GDAX_MATCHES_ONLY')
 		gdax_kwargs = GdaxClient.kwargs_from_environment()
 		kafka_kwargs = GdaxKafkaProducer.kwargs_from_environment()
 		return cls(kafka_topic,gdax_kwargs,kafka_kwargs,matches_only)
@@ -21,7 +21,7 @@ class GdaxKafkaProducer(GdaxClient):
 	@classmethod
 	def kwargs_from_environment(cls):
 		kwargs= {
-			'bootstrap_servers': cls.get_list_from_env('CRYPTO_KAFKA_BOOTSTRAP_SERVERS')
+			'bootstrap_servers': cls.get_list_from_env('CRYPTO_STREAMER_KAFKA_BOOTSTRAP_SERVERS')
 		}
 		return {k: v for k,v in kwargs.items() if v is not None}
 

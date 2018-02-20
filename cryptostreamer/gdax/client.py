@@ -33,9 +33,9 @@ class GdaxClient(ProviderClient):
 	@classmethod
 	def kwargs_from_environment(cls):
 		kwargs = {
-			'products': cls.get_list_from_env('CRYPTO_GDAX_PRODUCTS'),
-			'channels': cls.get_list_from_env('CRYPTO_GDAX_CHANNELS'),
-			'timeout': cls.get_int_from_env('CRYPTO_GDAX_TIMEOUT')
+			'products': cls.get_list_from_env('CRYPTO_STREAMER_GDAX_PRODUCTS'),
+			'channels': cls.get_list_from_env('CRYPTO_STREAMER_GDAX_CHANNELS'),
+			'timeout': cls.get_int_from_env('CRYPTO_STREAMER_GDAX_TIMEOUT')
 		}
 		return {k: v for k,v in kwargs.items() if v is not None}
 
