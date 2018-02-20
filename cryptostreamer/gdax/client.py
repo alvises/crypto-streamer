@@ -6,7 +6,6 @@
 """
 
 import json
-import logging, sys
 from datetime import datetime, timedelta
 
 from websocket import create_connection, WebSocketTimeoutException, WebSocketConnectionClosedException
@@ -16,10 +15,8 @@ from cryptostreamer.provider import ProviderClient
 class NoProductsError(Exception): pass
 class NoChannelsError(Exception): pass
 
-
-logging.basicConfig(stream=sys.stdout)
-LOGGER = logging.getLogger('GdaxClient')
-LOGGER.setLevel(logging.DEBUG)
+from cryptostreamer import get_logger
+LOGGER = get_logger('GdaxClient')
 
 
 GDAX_WSS_URL = 'wss://ws-feed.gdax.com'
@@ -88,7 +85,7 @@ class GdaxClient(ProviderClient):
 		"""
 		Callback for all the messages.
 		"""
-		LOGGER.info("recv: %s" %msg)
+		LOGGER.debug("recv: %s" %msg)
 		pass
 
 

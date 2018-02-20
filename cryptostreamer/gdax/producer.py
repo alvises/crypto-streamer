@@ -2,7 +2,11 @@ import json
 from .client import GdaxClient
 from kafka import KafkaProducer
 
+from cryptostreamer import get_logger
+LOGGER = get_logger('GdaxKafkaProducer')
+
 KAFKA_RES_TIMEOUT = 30
+
 
 class GdaxKafkaProducer(GdaxClient):
 
