@@ -1,0 +1,1 @@
+from cryptostreamer.gdax.producer import GdaxKafkaProducer
