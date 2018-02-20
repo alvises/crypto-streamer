@@ -5,11 +5,11 @@ import os
 
 class TestKafkaProducer:
 	def unset_envvars(self):
-		os.unsetenv('CRYPTO_GDAX_PRODUCTS')
-		os.unsetenv('CRYPTO_GDAX_CHANNELS')
-		os.unsetenv('CRYPTO_GDAX_TIMEOUT')
-		os.unsetenv('CRYPTO_KAFKA_BOOTSTRAP_SERVERS')
-		os.unsetenv('CRYPTO_KAFKA_TOPIC')
+		os.unsetenv('CRYPTO_STREAMER_GDAX_PRODUCTS')
+		os.unsetenv('CRYPTO_STREAMER_GDAX_CHANNELS')
+		os.unsetenv('CRYPTO_STREAMER_GDAX_TIMEOUT')
+		os.unsetenv('CRYPTO_STREAMER_KAFKA_BOOTSTRAP_SERVERS')
+		os.unsetenv('CRYPTO_STREAMER_KAFKA_GDAX_TOPIC')
 		os.unsetenv('CRYPTO_KAFKA_MATCHES_ONLY')
 
 
@@ -128,13 +128,13 @@ class TestKafkaProducer:
 
 
 	def test__create_with_environment(self):
-		os.environ['CRYPTO_GDAX_PRODUCTS'] = "LTC-EUR"
-		os.environ['CRYPTO_GDAX_CHANNELS'] = "ticker"
-		os.environ['CRYPTO_GDAX_TIMEOUT'] = "2"
+		os.environ['CRYPTO_STREAMER_GDAX_PRODUCTS'] = "LTC-EUR"
+		os.environ['CRYPTO_STREAMER_GDAX_CHANNELS'] = "ticker"
+		os.environ['CRYPTO_STREAMER_GDAX_TIMEOUT'] = "2"
 
-		os.environ['CRYPTO_KAFKA_BOOTSTRAP_SERVERS'] = 'localhost:9092'
-		os.environ['CRYPTO_KAFKA_TOPIC'] = 'gdax'
-		os.environ['CRYPTO_KAFKA_MATCHES_ONLY'] = 'true'
+		os.environ['CRYPTO_STREAMER_KAFKA_BOOTSTRAP_SERVERS'] = 'localhost:9092'
+		os.environ['CRYPTO_STREAMER_KAFKA_GDAX_TOPIC'] = 'gdax'
+		os.environ['CRYPTO_STREAMER_KAFKA_MATCHES_ONLY'] = 'true'
 
 		client = GdaxKafkaProducer.create_with_environment()
 
